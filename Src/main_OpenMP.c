@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     int *height = malloc(n * sizeof(int));
 
     double start_par = omp_get_wtime();
-    suffix_sort(str, n, pos, rank_arr, height);
+    suffix_sort(str, n, pos, rank_arr);
     double end_par = omp_get_wtime();
     build_lcp(str, n, pos, rank_arr, height);
 
