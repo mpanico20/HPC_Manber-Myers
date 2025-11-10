@@ -75,7 +75,6 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
         //
         for (int i = 0; i < n; i = next_bucket[i]) {
             cnt[i] = 0;
-            #pragma omp parallel for
             for (int j = i; j < next_bucket[i]; j++)
                 rank_arr[pos[j]] = i;
         }
