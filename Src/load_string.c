@@ -45,7 +45,5 @@ char *load_string_from_file(const char *filename, int *n) {
     input[read_bytes] = '\0';
 
     *n = (int)read_bytes;
-    printf("Letti %d caratteri (%.2f MB)\n", *n, *n / (1024.0 * 1024.0));
-
     return input;
 }

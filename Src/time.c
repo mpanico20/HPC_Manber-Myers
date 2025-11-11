@@ -21,7 +21,7 @@
 * You should have received a copy of the GNU General Public License along with ContestOMP.
 * If not, see <http://www.gnu.org/licenses/>.
 */
-#include "../Header/suffix_array.h"
+#include "../Header/suffix_arrays.h"
 
 // Function to calculate speedup based on sequential and parallel execution times
 double calculateSpeedup(double sequentialTime, double parallelTime) {

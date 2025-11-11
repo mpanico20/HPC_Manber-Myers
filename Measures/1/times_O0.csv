@@ -1,0 +1,5 @@
+Version,Num of thread,Elapsed Time (s),Speedup
+Serial,1,0.050028,1.000000OpenMP,1,0.051485,0.971709
+OpenMP,2,0.051369,0.973891
+OpenMP,3,0.058758,0.851429
+OpenMP,4,0.047548,1.052158

@@ -25,7 +25,7 @@
     #include <stdio.h>
     #include <stdlib.h>
 
-    static inline void shift_suffixes(
+static void shift_suffixes(
     int n, int h,
     int *pos,
     int *rank_arr,
@@ -35,7 +35,7 @@
     char *b2h
 );
 
-static inline void shift_suffixes_parallel(
+static void shift_suffixes_parallel(
     int n, int h,
     int *pos,
     int *rank_arr,

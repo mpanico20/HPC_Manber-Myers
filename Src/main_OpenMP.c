@@ -29,11 +29,14 @@
 #include "../Header/suffix_arrays.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        printf("Uso: %s <nomefile>\n", argv[0]);
+    if (argc < 3) {
+        printf("Uso: %s <nomefile> <optimization level> <number of thread>\n", argv[0]);
         return 1;
     }
-
+    printf("%d Number\n", omp_get_max_threads());
+    int num_thread = atoi(argv[3]);
+    if (num_thread > omp_get_max_threads()){ printf("Number of thread not supported!\n"); exit(1);}
+    omp_set_num_threads(num_thread);
     int n;
     char *input = load_string_from_file(argv[1], &n);
 
@@ -45,13 +48,50 @@ int main(int argc, char *argv[]) {
     int *pos = malloc(n * sizeof(int));
     int *rank_arr = malloc(n * sizeof(int));
     int *height = malloc(n * sizeof(int));
-
     double start_par = omp_get_wtime();
     suffix_sort(str, n, pos, rank_arr);
     double end_par = omp_get_wtime();
     build_lcp(str, n, pos, rank_arr, height);
 
-    double sequential_time = end_par - start_par;
+    double parallel_time = end_par - start_par;
+    int mb = extractMB(argv[1]);
+    char filename[250];
+    sprintf(filename, "../Measures/%d/times_%s.csv", mb, argv[2]);
+    FILE *csv_serial = fopen(filename, "r");
+    double sequential_time;
+    char line[256];
+
+    if (fgets(line, sizeof(line), csv_serial) == NULL) {
+        fprintf(stderr, "Error in reading the file!\n");
+        exit(1);
+    }
+
+    if (fscanf(csv_serial, "%*[^,],%*[^,],%lf", &sequential_time) != 1){
+        fprintf(stderr, "Error in reading the time in csv file!");
+        exit(1);
+    }
+
+    fclose(csv_serial);
+
+    double speedup = sequential_time / parallel_time;
+
+    char filenameCsv[250];
+    sprintf(filenameCsv, "../Measures/%d/times_%s.csv",mb,argv[2]);
+
+    FILE *csv;
+    csv = fopen(filenameCsv, "a");
+
+    if (csv == NULL) {
+        printf("Error!");
+        exit(1);
+    }
+
+    if (ftell(csv) == 0){
+        fprintf(csv, "Version,Num of thread,Elapsed Time (s),Speedup\n");
+    }
+    fprintf(csv, "OpenMP,%d,%f,%f\n",num_thread, parallel_time, speedup);
+    fclose(csv);
+
     printf("Suffix Array (pos):\n");
     for (int i = 0; i < 5; i++)
         printf("%2d:\n", pos[i]);
@@ -77,7 +117,7 @@ int main(int argc, char *argv[]) {
     for (int j = 0; j < max_len; j++)
         putchar(str[start_index + j]);
     printf("\n");
-    printf("Sequantian time: %f\n", sequential_time);
+    printf("Sequantian time: %f\n", parallel_time);
 
     free(str);
     free(pos);
