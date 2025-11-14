@@ -1,4 +1,3 @@
-
 /*
 * Course: High Performance Computing 2025/2026
 * 
@@ -30,7 +29,7 @@
 #include "../Header/suffix_arrays.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
+    if (argc < 2) {
         printf("Uso: %s <nomefile> <optimization_level>\n", argv[0]);
         return 1;
     }
@@ -40,12 +39,15 @@ int main(int argc, char *argv[]) {
 
     // Copia in array di int
     int *str = malloc(n * sizeof(int));
+    if (!str) { fprintf(stderr, "Malloc failed\n"); exit(1); }
+
     for (int i = 0; i < n; i++)
         str[i] = (unsigned char)input[i];
 
     int *pos = malloc(n * sizeof(int));
     int *rank_arr = malloc(n * sizeof(int));
     int *height = malloc(n * sizeof(int));
+    if (!pos || !rank_arr || !height) { fprintf(stderr, "Malloc failed\n"); exit(1); }
 
     clock_t start_seq = clock();
     suffix_sort(str, n, pos, rank_arr);

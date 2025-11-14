@@ -1,4 +1,3 @@
-
 /*
 * Course: High Performance Computing 2025/2026
 * 
@@ -33,21 +32,26 @@ int main(int argc, char *argv[]) {
         printf("Uso: %s <nomefile> <optimization level> <number of thread>\n", argv[0]);
         return 1;
     }
-    printf("%d Number\n", omp_get_max_threads());
+
     int num_thread = atoi(argv[3]);
     if (num_thread > omp_get_max_threads()){ printf("Number of thread not supported!\n"); exit(1);}
     omp_set_num_threads(num_thread);
+
     int n;
     char *input = load_string_from_file(argv[1], &n);
 
     // Copia in array di int
     int *str = malloc(n * sizeof(int));
+    if (!str) { fprintf(stderr, "Malloc failed\n"); exit(1); }
+
     for (int i = 0; i < n; i++)
         str[i] = (unsigned char)input[i];
 
     int *pos = malloc(n * sizeof(int));
     int *rank_arr = malloc(n * sizeof(int));
     int *height = malloc(n * sizeof(int));
+    if (!pos || !rank_arr || !height) { fprintf(stderr, "Malloc failed\n"); exit(1); }
+
     double start_par = omp_get_wtime();
     suffix_sort(str, n, pos, rank_arr);
     double end_par = omp_get_wtime();
@@ -73,7 +77,7 @@ int main(int argc, char *argv[]) {
 
     fclose(csv_serial);
 
-    double speedup = sequential_time / parallel_time;
+    double speedup = calculateSpeedup(sequential_time, parallel_time);
 
     char filenameCsv[250];
     sprintf(filenameCsv, "../Measures/%d/times_%s.csv",mb,argv[2]);
@@ -92,6 +96,7 @@ int main(int argc, char *argv[]) {
     fprintf(csv, "OpenMP,%d,%f,%f\n",num_thread, parallel_time, speedup);
     fclose(csv);
 
+    // ---------- //
     printf("Suffix Array (pos):\n");
     for (int i = 0; i < 5; i++)
         printf("%2d:\n", pos[i]);
