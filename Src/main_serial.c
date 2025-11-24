@@ -29,8 +29,8 @@
 #include "../Header/suffix_arrays.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        printf("Uso: %s <nomefile> <optimization_level>\n", argv[0]);
+    if (argc < 3) {
+        printf("Uso: %s <nomefile> <optimization_level> <version to compare>\n", argv[0]);
         return 1;
     }
 
@@ -56,11 +56,12 @@ int main(int argc, char *argv[]) {
 
     double sequential_time = ((double)(end_seq - start_seq)) / CLOCKS_PER_SEC;
 
-    double speedup = ((double)calculateSpeedup(sequential_time, sequential_time));
+    double speedup = (calculateSpeedup(sequential_time, sequential_time));
+    double efficiency = (calculateEfficiency(speedup,1));
 
     char filename[250];
     int mb = extractMB(argv[1]);
-    sprintf(filename, "../Measures/%d/times_%s.csv",mb,argv[2]);
+    sprintf(filename, "../Measures/%s/%d/times_%s.csv",argv[3],mb,argv[2]);
 
     FILE *csv;
     csv = fopen(filename, "a");
@@ -71,10 +72,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (ftell(csv) == 0){
-        fprintf(csv, "Version,Num of thread,Elapsed Time (s),Speedup\n");
+        fprintf(csv, "Version;Num of thread;Elapsed Time (s);Speedup;Efficency\n");
     }
 
-    fprintf(csv, "Serial,1,%f,%f\n", sequential_time, speedup);
+    fprintf(csv, "Serial;1;%f;%f;%f%%\n", sequential_time, speedup,efficiency);
     fclose(csv);
 
     free(str);
