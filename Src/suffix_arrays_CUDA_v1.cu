@@ -33,15 +33,6 @@ __global__ void calculate_freq(int *c_str, int n, int *c_freq){
     }
 }
 
-__global__ void assign_pos(const int *d_str, int *d_pos, int *d_freq, int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        int val = d_str[idx];
-        int pos_idx = atomicSub(&d_freq[val], 1) - 1;
-        d_pos[pos_idx] = idx;
-    }
-}
-
 __global__ void init_buckets(const int *d_str, int *d_pos, char *d_bh, char *d_b2h, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) {
@@ -131,11 +122,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
 
     for (int i = 1; i < ALPHABET_SIZE; i++) freq[i] += freq[i - 1];
-    cudaMemcpy(d_freq, freq, ALPHABET_SIZE * sizeof(int), cudaMemcpyHostToDevice);
-
-    assign_pos<<<gridSize, blockSize>>>(d_str, d_pos, d_freq, n);
-    cudaDeviceSynchronize();
-    cudaMemcpy(pos, d_pos, n * sizeof(int), cudaMemcpyDeviceToHost);
+    for (int i = n - 1; i >= 0; i--) pos[--freq[(unsigned char)str[i]]] = i;
 
     // ---------- INIZIALIZZA BUCKET ----------
     cudaMemcpy(d_bh, bh, (n + 1) * sizeof(char), cudaMemcpyHostToDevice);
@@ -149,7 +136,6 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     // ---------- MANBER & MYERS ----------
     for (int h = 1; h < n; h <<= 1) {
         int buckets = 0;
-        printf("Sono al h%d\n", h);
         for (int i = 0, j; i < n; i = j) {
             j = i + 1;
             while (j < n && !bh[j]) j++;
