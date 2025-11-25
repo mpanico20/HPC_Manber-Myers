@@ -28,14 +28,16 @@
 #include "../Header/suffix_arrays.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <nomefile> <optimization level> <number of thread>\n", argv[0]);
+    if (argc < 4) {
+        printf("Uso: %s <nomefile> <optimization level> <number of thread> <parallel version>\n", argv[0]);
         return 1;
     }
 
     int num_thread = atoi(argv[3]);
     if (num_thread > omp_get_max_threads()){ printf("Number of thread not supported!\n"); exit(1);}
     omp_set_num_threads(num_thread);
+
+    int version_p = atoi(argv[4]);
 
     int n;
     char *input = load_string_from_file(argv[1], &n);
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
     double parallel_time = end_par - start_par;
     int mb = extractMB(argv[1]);
     char filename[250];
-    sprintf(filename, "../Measures/%d/times_%s.csv", mb, argv[2]);
+    sprintf(filename, "../Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
     FILE *csv_serial = fopen(filename, "r");
     double sequential_time;
     char line[256];
@@ -70,8 +72,8 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    if (fscanf(csv_serial, "%*[^,],%*[^,],%lf", &sequential_time) != 1){
-        fprintf(stderr, "Error in reading the time in csv file!");
+    if (fscanf(csv_serial, "%*[^;];%*[^;];%lf", &sequential_time) != 1){
+        fprintf(stderr, "Error in reading the time in csv file!\n");
         exit(1);
     }
 
@@ -80,7 +82,7 @@ int main(int argc, char *argv[]) {
     double speedup = calculateSpeedup(sequential_time, parallel_time);
 
     char filenameCsv[250];
-    sprintf(filenameCsv, "../Measures/%d/times_%s.csv",mb,argv[2]);
+    sprintf(filenameCsv, "../Measures/OpenMP/%d/times_%s.csv",mb,argv[2]);
 
     FILE *csv;
     csv = fopen(filenameCsv, "a");
@@ -91,9 +93,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (ftell(csv) == 0){
-        fprintf(csv, "Version,Num of thread,Elapsed Time (s),Speedup\n");
+        fprintf(csv, "Version;Num of thread;Elapsed Time (s);Speedup;Efficency\n");
     }
-    fprintf(csv, "OpenMP,%d,%f,%f\n",num_thread, parallel_time, speedup);
+    fprintf(csv, "OpenMP_v%d;%d;%f;%f\n",version_p,num_thread, parallel_time, speedup);
     fclose(csv);
 
     // ---------- //
