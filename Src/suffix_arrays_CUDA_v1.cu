@@ -99,7 +99,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
     int *d_str, *d_freq, *d_pos, *d_rank_arr, *d_cnt;
     char *d_bh, *d_b2h;
-    if (!d_str || !d_freq || !d_pos || !d_rank_arr || !d_cnt || !d_bh || !d_b2h) { fprintf(stderr, "Alloc failed\n"); exit(1); }
+    
 
 
     cudaMalloc((void **)&d_str, n * sizeof(int));
@@ -164,7 +164,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
             int bucketSize = next_bucket[i] - i;
             int gridSizeBucket = (bucketSize + blockSize - 1) / blockSize;
             update_rank_offset<<<gridSizeBucket, blockSize>>>(d_pos, d_rank_arr, d_cnt, d_b2h, h, i, next_bucket[i]);
-
+            cudaDeviceSynchronize();
             clean_b2h<<<gridSizeBucket, blockSize>>>(d_pos, d_rank_arr, d_bh, d_b2h, h, i, next_bucket[i], n);
         }
 
