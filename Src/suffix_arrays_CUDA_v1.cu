@@ -103,13 +103,10 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     char *bh = (char *)calloc(n + 1, sizeof(char));
     char *b2h = (char *)calloc(n + 1, sizeof(char));
     int *freq = (int *)calloc(ALPHABET_SIZE, sizeof(int));
-    if (!cnt || !next_bucket || !bh || !b2h || !freq) { fprintf(stderr, "Alloc failed\n"); exit(1); }
     
 
     int *d_str, *d_freq, *d_pos, *d_rank_arr, *d_cnt;
     char *d_bh, *d_b2h;
-    if (!d_str || !d_freq || !d_pos || !d_rank_arr || !d_cnt || !d_bh || !d_b2h) { fprintf(stderr, "Alloc failed\n"); exit(1); }
-
 
     cudaMalloc((void **)&d_str, n * sizeof(int));
     cudaMalloc((void **)&d_freq, ALPHABET_SIZE * sizeof(int));

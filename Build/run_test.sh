@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Valori da sostituire: 1, 50, 100, 200, 500
-values=(1 50 100 200 500)
-
-for v in "${values[@]}"; do
-    ./sequential_O1 "../Data/string_${v}MB.txt" O1 OpenMP
+for size in 1MB 50MB 100MB 200MB 500MB
+do
+    ./sequential_O3 ../Data/string_$size.txt O3 OpenMP
 done
-

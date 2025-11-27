@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
     fclose(csv_serial);
 
     double speedup = calculateSpeedup(sequential_time, parallel_time);
+    double efficiency = calculateEfficiency(speedup, num_thread);
 
     char filenameCsv[250];
     sprintf(filenameCsv, "../Measures/OpenMP/%d/times_%s.csv",mb,argv[2]);
@@ -95,36 +96,9 @@ int main(int argc, char *argv[]) {
     if (ftell(csv) == 0){
         fprintf(csv, "Version;Num of thread;Elapsed Time (s);Speedup;Efficency\n");
     }
-    fprintf(csv, "OpenMP_v%d;%d;%f;%f\n",version_p,num_thread, parallel_time, speedup);
+    fprintf(csv, "OpenMP_v%d;%d;%f;%f;%f\n",version_p,num_thread, parallel_time, speedup,efficiency);
     fclose(csv);
 
-    // ---------- //
-    printf("Suffix Array (pos):\n");
-    for (int i = 0; i < 5; i++)
-        printf("%2d:\n", pos[i]);
-
-    printf("\nLCP array:\n");
-    for (int i = 0; i < 5; i++)
-        printf("%d ", height[i]);
-    printf("\n");
-
-    int max_len = 0;
-    int start_index = 0;
-
-    for (int i = 1; i < n; i++) {
-        if (height[i] > max_len) {
-            max_len = height[i];
-            start_index = pos[i-1];  // puoi anche scegliere pos[i-1], sono equivalenti
-        }
-    }
-
-    printf("Max substring length: %d\n", max_len);
-    printf("Substring: ");
-    printf("Pos: %d\n", start_index);
-    for (int j = 0; j < max_len; j++)
-        putchar(str[start_index + j]);
-    printf("\n");
-    printf("Sequantian time: %f\n", parallel_time);
 
     free(str);
     free(pos);
