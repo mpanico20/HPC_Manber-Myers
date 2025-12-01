@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
     if (ftell(csv) == 0){
         fprintf(csv, "Version;Num of thread;Elapsed Time (s);Speedup;Efficency\n");
     }
-    fprintf(csv, "OpenMP_v%d;%d;%f;%f;%f\n",version_p,num_thread, parallel_time, speedup,efficiency);
+    fprintf(csv, "OpenMP_v%d;%d;%f;%f;%f%%\n",version_p,num_thread, parallel_time, speedup,efficiency);
     fclose(csv);
 
 
