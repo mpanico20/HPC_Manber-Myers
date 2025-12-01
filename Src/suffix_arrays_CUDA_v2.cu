@@ -58,11 +58,11 @@ __global__ void final_rank(int *d_pos, int *d_rank_arr, int n) {
 
 void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
-    int *cnt = calloc(n + 1, sizeof(int));
-    int *next_bucket = calloc(n + 1, sizeof(int));
-    char *bh = calloc(n + 1, sizeof(char));
-    char *b2h = calloc(n + 1, sizeof(char));
-    int *freq = calloc(ALPHABET_SIZE, sizeof(int));
+    int *cnt = (int *)calloc(n + 1, sizeof(int));
+    int *next_bucket = (int *)calloc(n + 1, sizeof(int));
+    char *bh = (char *)calloc(n + 1, sizeof(char));
+    char *b2h = (char *)calloc(n + 1, sizeof(char));
+    int *freq = (int *)calloc(ALPHABET_SIZE, sizeof(int));
 
     int *d_str, *d_freq, *d_pos, *d_rank_arr;
     char *d_bh, *d_b2h;
