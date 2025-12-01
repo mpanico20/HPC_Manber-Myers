@@ -56,6 +56,33 @@ __global__ void final_rank(int *d_pos, int *d_rank_arr, int n) {
     }
 }
 
+// ---------------------- Parallel rank update for h < 4 ----------------------
+__global__ void shift_suffixes_kernel(int *d_pos, int *d_rank_arr, int *d_cnt, char *d_b2h, int h, int start, int end) {
+    int j = blockIdx.x * blockDim.x + threadIdx.x + start;
+    if (j < end) {
+        int s = d_pos[j] - h;
+        if (s >= 0) {
+            int head = d_rank_arr[s];
+            int offset = atomicAdd(&d_cnt[head], 1);
+            int new_rank = head + offset;
+            d_rank_arr[s] = new_rank;
+            d_b2h[new_rank] = 1;
+        }
+    }
+}
+
+__global__ void clean_b2h_kernel(int *d_pos, int *d_rank_arr, char *d_bh, char *d_b2h, int h, int start, int end, int n) {
+    int j = blockIdx.x * blockDim.x + threadIdx.x + start;
+    if (j < end) {
+        int s = d_pos[j] - h;
+        if (s >= 0 && d_b2h[d_rank_arr[s]]) {
+            for (int k = d_rank_arr[s] + 1; k < n && !d_bh[k] && d_b2h[k]; k++) {
+                d_b2h[k] = 0;
+            }
+        }
+    }
+}
+
 void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
     int *cnt = (int *)calloc(n + 1, sizeof(int));
@@ -64,13 +91,14 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     char *b2h = (char *)calloc(n + 1, sizeof(char));
     int *freq = (int *)calloc(ALPHABET_SIZE, sizeof(int));
 
-    int *d_str, *d_freq, *d_pos, *d_rank_arr;
+    int *d_str, *d_freq, *d_pos, *d_rank_arr, *d_cnt;
     char *d_bh, *d_b2h;
 
     cudaMalloc(&d_str, n * sizeof(int));
     cudaMalloc(&d_freq, ALPHABET_SIZE * sizeof(int));
     cudaMalloc(&d_pos, n * sizeof(int));
     cudaMalloc(&d_rank_arr, n * sizeof(int));
+    cudaMalloc(&d_cnt, (n + 1) * sizeof(int));
     cudaMalloc(&d_bh, (n + 1) * sizeof(char));
     cudaMalloc(&d_b2h, (n + 1) * sizeof(char));
 
@@ -96,15 +124,14 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     cudaMemset(d_bh, 0, (n + 1) * sizeof(char));
     cudaMemset(d_b2h, 0, (n + 1) * sizeof(char));
     init_buckets<<<gridSize, blockSize>>>(d_str, d_pos, d_bh, d_b2h, n);
-
     cudaMemcpy(bh, d_bh, (n + 1) * sizeof(char), cudaMemcpyDeviceToHost);
     cudaMemcpy(b2h, d_b2h, (n + 1) * sizeof(char), cudaMemcpyDeviceToHost);
 
-    // ---------------------- SEQUENTIAL MAIN LOOP (LIKE OpenMP) ----------------------
+    // ---------------------- MAIN LOOP ----------------------
     for (int h = 1; h < n; h <<= 1) {
         int buckets = 0;
 
-        // IDENTICAL TO OpenMP: sequential bucket calculation
+        // sequential bucket calculation
         for (int i = 0, j; i < n; i = j) {
             j = i + 1;
             while (j < n && !bh[j]) j++;
@@ -114,42 +141,35 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
         if (buckets == n) break;
 
-        // sequential rank assignment (OpenMP does NOT parallelize this)
+        // rank assignment
         for (int i = 0; i < n; i = next_bucket[i]) {
             cnt[i] = 0;
-            for (int j = i; j < next_bucket[i]; j++)
-                rank_arr[pos[j]] = i;
+            if (h < 4) {
+                // parallel rank assignment for small h
+                int bucketSize = next_bucket[i] - i;
+                int gridBucket = (bucketSize + blockSize - 1) / blockSize;
+                cudaMemcpy(d_pos, pos, n * sizeof(int), cudaMemcpyHostToDevice);
+                cudaMemcpy(d_rank_arr, rank_arr, n * sizeof(int), cudaMemcpyHostToDevice);
+                cudaMemset(d_cnt, 0, (n + 1) * sizeof(int));
+                shift_suffixes_kernel<<<gridBucket, blockSize>>>(d_pos, d_rank_arr, d_cnt, d_b2h, h, i, next_bucket[i]);
+                clean_b2h_kernel<<<gridBucket, blockSize>>>(d_pos, d_rank_arr, d_bh, d_b2h, h, i, next_bucket[i], n);
+                cudaMemcpy(rank_arr, d_rank_arr, n * sizeof(int), cudaMemcpyDeviceToHost);
+            } else {
+                // sequential rank update for large h
+                for (int j = i; j < next_bucket[i]; j++) {
+                    rank_arr[pos[j]] = i;
+                }
+            }
         }
 
         cnt[rank_arr[n - h]]++;
         b2h[rank_arr[n - h]] = 1;
 
-        // sequential update of ranks and cleanup
-        for (int i = 0; i < n; i = next_bucket[i]) {
-            for (int j = i; j < next_bucket[i]; j++) {
-                int s = pos[j] - h;
-                if (s >= 0) {
-                    int head = rank_arr[s];
-                    rank_arr[s] = head + cnt[head]++;
-                    b2h[rank_arr[s]] = 1;
-                }
-            }
-            for (int j = i; j < next_bucket[i]; j++) {
-                int s = pos[j] - h;
-                if (s >= 0 && b2h[rank_arr[s]]) {
-                    for (int k = rank_arr[s] + 1; k < n && !bh[k] && b2h[k]; k++)
-                        b2h[k] = 0;
-                }
-            }
-        }
-
-        // ---------------------- PARALLEL final update ----------------------
+        // final update (parallelizable)
         cudaMemcpy(d_rank_arr, rank_arr, n * sizeof(int), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_b2h, b2h, (n + 1) * sizeof(char), cudaMemcpyHostToDevice);
         cudaMemcpy(d_bh, bh, (n + 1) * sizeof(char), cudaMemcpyHostToDevice);
-
+        cudaMemcpy(d_b2h, b2h, (n + 1) * sizeof(char), cudaMemcpyHostToDevice);
         update_pos_bh<<<gridSize, blockSize>>>(d_pos, d_rank_arr, d_bh, d_b2h, n);
-
         cudaMemcpy(pos, d_pos, n * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(bh, d_bh, (n + 1) * sizeof(char), cudaMemcpyDeviceToHost);
     }
@@ -163,6 +183,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     cudaFree(d_freq);
     cudaFree(d_pos);
     cudaFree(d_rank_arr);
+    cudaFree(d_cnt);
     cudaFree(d_bh);
     cudaFree(d_b2h);
 
