@@ -1,2 +1,5 @@
 Version;Num of thread;Elapsed Time (s);Speedup;Efficency
 Serial;1;6.570436;1.000000;100.000000%
+OpenMP_v0;1;21.623825;0.303852;30.385170
+OpenMP_v0;2;33.609067;0.195496;9.774797
+OpenMP_v0;4;51.678914;0.127140;3.178490
