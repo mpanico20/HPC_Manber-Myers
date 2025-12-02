@@ -184,12 +184,11 @@ static void shift_suffixes_parallel(
             int s = pos[j] - h;
             if (s >= 0) {
                 int head = rank_arr[s];
-                int new_rank;
-                #pragma omp atomic capture
-                new_rank = cnt[head]++;
-
-                rank_arr[s] = head + new_rank;
+                #pragma omp critical
+                {
+                rank_arr[s] = head + cnt[head]++;
                 b2h[rank_arr[s]] = 1;
+                }
             }
         }
 
