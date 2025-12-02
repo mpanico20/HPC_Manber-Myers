@@ -28,9 +28,11 @@
 #include <ctype.h>
 #include "../Header/suffix_arrays.h"
 
+void write_csv(const char *filename, double sequential_time, double speedup, double efficiency);
+
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        printf("Uso: %s <nomefile> <optimization_level> <version to compare>\n", argv[0]);
+        printf("Uso: %s <nomefile> <optimization_level>\n", argv[0]);
         return 1;
     }
 
@@ -61,22 +63,12 @@ int main(int argc, char *argv[]) {
 
     char filename[250];
     int mb = extractMB(argv[1]);
-    sprintf(filename, "../Measures/%s/%d/times_%s.csv",argv[3],mb,argv[2]);
 
-    FILE *csv;
-    csv = fopen(filename, "a");
+    sprintf(filename, "../Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
+    write_csv(filename, sequential_time, speedup, efficiency);
 
-    if (csv == NULL) {
-        printf("Error!");
-        exit(1);
-    }
-
-    if (ftell(csv) == 0){
-        fprintf(csv, "Version;Num of thread;Elapsed Time (s);Speedup;Efficency\n");
-    }
-
-    fprintf(csv, "Serial;1;%f;%f;%f%%\n", sequential_time, speedup,efficiency);
-    fclose(csv);
+    sprintf(filename, "../Measures/CUDA/%d/times_%s.csv", mb, argv[2]);
+    write_csv(filename, sequential_time, speedup, efficiency);
 
     free(str);
     free(pos);
@@ -85,4 +77,21 @@ int main(int argc, char *argv[]) {
     free(input);
 
     return 0;
+}
+
+void write_csv(const char *filename, double sequential_time, double speedup, double efficiency) {
+    FILE *csv = fopen(filename, "a");
+    if (!csv) {
+        printf("Error opening file %s!\n", filename);
+        exit(1);
+    }
+
+    // Scrive intestazione se il file è vuoto
+    if (ftell(csv) == 0) {
+        fprintf(csv, "Version;Num of thread;Elapsed Time (s);Speedup;Efficency\n");
+    }
+
+    // Scrive i dati
+    fprintf(csv, "Serial;1;%f;%f;%f%%\n", sequential_time, speedup, efficiency);
+    fclose(csv);
 }
