@@ -136,7 +136,6 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     // ---------- MANBER & MYERS ----------
     for (int h = 1; h < n; h <<= 1) {
         int buckets = 0;
-        printf("Sono al h%d\n", h);
         for (int i = 0, j; i < n; i = j) {
             j = i + 1;
             while (j < n && !bh[j]) j++;

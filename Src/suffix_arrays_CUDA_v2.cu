@@ -56,33 +56,6 @@ __global__ void final_rank(int *d_pos, int *d_rank_arr, int n) {
     }
 }
 
-// ---------------------- Parallel rank update for h < 4 ----------------------
-__global__ void shift_suffixes_kernel(int *d_pos, int *d_rank_arr, int *d_cnt, char *d_b2h, int h, int start, int end) {
-    int j = blockIdx.x * blockDim.x + threadIdx.x + start;
-    if (j < end) {
-        int s = d_pos[j] - h;
-        if (s >= 0) {
-            int head = d_rank_arr[s];
-            int offset = atomicAdd(&d_cnt[head], 1);
-            int new_rank = head + offset;
-            d_rank_arr[s] = new_rank;
-            d_b2h[new_rank] = 1;
-        }
-    }
-}
-
-__global__ void clean_b2h_kernel(int *d_pos, int *d_rank_arr, char *d_bh, char *d_b2h, int h, int start, int end, int n) {
-    int j = blockIdx.x * blockDim.x + threadIdx.x + start;
-    if (j < end) {
-        int s = d_pos[j] - h;
-        if (s >= 0 && d_b2h[d_rank_arr[s]]) {
-            for (int k = d_rank_arr[s] + 1; k < n && !d_bh[k] && d_b2h[k]; k++) {
-                d_b2h[k] = 0;
-            }
-        }
-    }
-}
-
 void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     int *cnt = (int *)calloc(n + 1, sizeof(int));
     int *next_bucket = (int *)calloc(n + 1, sizeof(int));
@@ -135,10 +108,6 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
         if (buckets == n) break; // tutti distinti
 
-        cudaMemset(d_cnt, 0, (n + 1) * sizeof(int));
-
-        // ----------------- REDUCED PARALLELIZATION -----------------
-
         // 1) Rank initialization - SEQUENZIALE
         for (int i = 0; i < n; i = next_bucket[i]) {
             cnt[i] = 0;
@@ -171,9 +140,12 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
         }
 
         // ----------------- parallel safe operations -----------------
+        cudaMemcpy(d_b2h, b2h, (n + 1) * sizeof(char), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_rank_arr, rank_arr, n * sizeof(int), cudaMemcpyHostToDevice);
         update_pos_bh<<<gridSize, blockSize>>>(d_pos, d_rank_arr, d_bh, d_b2h, n);
         cudaDeviceSynchronize();
         cudaMemcpy(bh, d_bh, (n + 1) * sizeof(char), cudaMemcpyDeviceToHost);
+        cudaMemcpy(pos, d_pos, n * sizeof(int), cudaMemcpyDeviceToHost);
     }
 
     final_rank<<<gridSize, blockSize>>>(d_pos, d_rank_arr, n);
