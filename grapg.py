@@ -49,7 +49,7 @@ def plot_speedup(df, serial_name, parallel_name):
     plt.legend()
     plt.tight_layout()
 
-    output_file = f'speedup_vs_serial_{serial_name}_{parallel_name}.png'
+    output_file = f'Graphs/speedup_vs_serial_{serial_name}_{parallel_name}.png'
     plt.savefig(output_file)
     plt.show()
     print(f"Grafico salvato come '{output_file}'")

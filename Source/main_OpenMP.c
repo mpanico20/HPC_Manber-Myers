@@ -51,13 +51,11 @@ int main(int argc, char *argv[]) {
 
     int *pos = malloc(n * sizeof(int));
     int *rank_arr = malloc(n * sizeof(int));
-    int *height = malloc(n * sizeof(int));
-    if (!pos || !rank_arr || !height) { fprintf(stderr, "Malloc failed\n"); exit(1); }
+    if (!pos || !rank_arr ) { fprintf(stderr, "Malloc failed\n"); exit(1); }
 
     double start_par = omp_get_wtime();
     suffix_sort(str, n, pos, rank_arr);
     double end_par = omp_get_wtime();
-    build_lcp(str, n, pos, rank_arr, height);
 
     double parallel_time = end_par - start_par;
     int mb = extractMB(argv[1]);
@@ -99,11 +97,19 @@ int main(int argc, char *argv[]) {
     fprintf(csv, "OpenMP_v%d;%d;%f;%f;%f%%\n",version_p,num_thread, parallel_time, speedup,efficiency);
     fclose(csv);
 
+    printf("Suffix Array (pos):\n");
+    for (int i = 0; i < 5; i++){
+        printf("rank %d: %d\n",i , rank_arr[i]);
+        printf("%2d:\n", pos[i]);
+    }
+        
+
+    
+
 
     free(str);
     free(pos);
     free(rank_arr);
-    free(height);
     free(input);
 
     return 0;

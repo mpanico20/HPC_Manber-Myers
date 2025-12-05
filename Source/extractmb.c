@@ -21,22 +21,43 @@
 * You should have received a copy of the GNU General Public License along with ContestOMP.
 * If not, see <http://www.gnu.org/licenses/>.
 */
-#include "../Header/suffix_arrays.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+#include "../Header/suffix_arrays.h"
 
-void build_lcp(const int *str, int n, int *pos, int *rank_arr, int *height) {
-    for (int i = 0; i < n; i++)
-        rank_arr[pos[i]] = i;
+int extractMB(char *filepath) {
+    //Extract only the file name without the path
+    char *last_slash = strrchr(filepath, '/');
+    char *filename = (last_slash) ? last_slash + 1 : filepath;
 
-    int h = 0;
-    height[0] = 0;
-    for (int i = 0; i < n; i++) {
-        if (rank_arr[i] > 0) {
-            int j = pos[rank_arr[i] - 1];
-            while (i + h < n && j + h < n && str[i + h] == str[j + h]) h++;
-            height[rank_arr[i]] = h;
-            if (h > 0) h--;
-        }
+    //Remove extension, if any
+    char *dot = strrchr(filename, '.');
+    if (dot) *dot = '\0';
+
+    //Find the last underscore
+    char *underscore = strrchr(filename, '_');
+    if (!underscore) {
+        fprintf(stderr, "Invalid file format (no '_')\n");
+        return -1;
     }
+
+    underscore++; //point to the number before "MB"
+
+    //Copy only the numeric part up to "MB"
+    char num_str[20] = {0};
+    int i = 0;
+    while (isdigit(underscore[i])) {
+        num_str[i] = underscore[i];
+        i++;
+    }
+
+    if (i == 0) {
+        fprintf(stderr, "No number found in file name\n");
+        return -1;
+    }
+
+    return atoi(num_str);
 }

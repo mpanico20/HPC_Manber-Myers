@@ -1,4 +1,3 @@
-
 /*
 * Course: High Performance Computing 2025/2026
 * 
@@ -24,41 +23,31 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
-#include <ctype.h>
-#include "../Header/suffix_arrays.h"
 
-int extractMB(char *filepath) {
-    // Estrai solo il nome del file senza percorso
-    char *last_slash = strrchr(filepath, '/');
-    char *filename = (last_slash) ? last_slash + 1 : filepath;
+int main() {
+    //Desired total size
+    size_t total_sizes[] = {1024*1024, 50*1024*1024, 100*1024*1024, 200*1024*1024, 500*1024*1024};
+    size_t n_sizes = sizeof(total_sizes)/sizeof(total_sizes[0]);
+    size_t n_arrays = 8;
+    const char charset[] = "abcdefghijklmnopqrstuvwxyz";
 
-    // Rimuovi estensione, se c'è
-    char *dot = strrchr(filename, '.');
-    if (dot) *dot = '\0';
+    srand((unsigned int)time(NULL));
 
-    // Trova l'ultimo underscore
-    char *underscore = strrchr(filename, '_');
-    if (!underscore) {
-        fprintf(stderr, "Formato del file non valido (nessun '_')\n");
-        return -1;
+    for (size_t s = 0; s < n_sizes; s++) {
+        size_t n_chars = total_sizes[s] / n_arrays;
+
+        char filename[64];
+        sprintf(filename, "../Data/string_%zuMB.txt", total_sizes[s]/1024/1024);
+
+        FILE *f = fopen(filename, "w");
+        if (!f) { perror("fopen"); return 1; }
+
+        for (size_t i = 0; i < n_chars; i++)
+            fputc(charset[rand() % 26], f);
+
+        fclose(f);
     }
 
-    underscore++; // punta al numero prima di "MB"
-
-    // Copia solo la parte numerica fino a "MB"
-    char num_str[20] = {0};
-    int i = 0;
-    while (isdigit(underscore[i])) {
-        num_str[i] = underscore[i];
-        i++;
-    }
-
-    if (i == 0) {
-        fprintf(stderr, "Nessun numero trovato nel nome del file\n");
-        return -1;
-    }
-
-    return atoi(num_str);
+    return 0;
 }

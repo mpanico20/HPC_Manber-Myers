@@ -28,11 +28,11 @@
 char *load_string_from_file(const char *filename, int *n) {
     FILE *f = fopen(filename, "rb");
     if (!f) {
-        perror("Errore apertura file");
+        perror("Error opening file");
         exit(1);
     }
 
-    // Vai alla fine per scoprire la dimensione
+    //Go to the end to find out the size
     if (fseek(f, 0, SEEK_END) != 0) {
         perror("Errore fseek");
         fclose(f);
@@ -47,23 +47,23 @@ char *load_string_from_file(const char *filename, int *n) {
     }
     rewind(f);
 
-    // Alloca memoria (aggiungiamo 2 byte per '$' e '\0')
+    //Allocate memory (add 2 bytes for '$' and '\0')
     char *input = malloc(file_size + 2);
     if (!input) {
-        fprintf(stderr, "Errore allocazione memoria (%.2f MB richiesti)\n", file_size / (1024.0 * 1024.0));
+        fprintf(stderr, "Memory allocation error (%.2f MB required)\n", file_size / (1024.0 * 1024.0));
         fclose(f);
         exit(1);
     }
 
-    // Legge il file
+    //Read the file
     size_t read_bytes = fread(input, 1, file_size, f);
     fclose(f);
 
-    // Rimuove eventuali newline finali
+    //Removes any trailing newlines
     while (read_bytes > 0 && (input[read_bytes - 1] == '\n' || input[read_bytes - 1] == '\r'))
         read_bytes--;
 
-    // Aggiunge il terminatore del suffisso array
+    //Adds array suffix terminator
     input[read_bytes++] = '$';
     input[read_bytes] = '\0';
 

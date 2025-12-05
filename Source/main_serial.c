@@ -39,7 +39,6 @@ int main(int argc, char *argv[]) {
     int n;
     char *input = load_string_from_file(argv[1], &n);
 
-    // Copia in array di int
     int *str = malloc(n * sizeof(int));
     if (!str) { fprintf(stderr, "Malloc failed\n"); exit(1); }
 
@@ -48,13 +47,11 @@ int main(int argc, char *argv[]) {
 
     int *pos = malloc(n * sizeof(int));
     int *rank_arr = malloc(n * sizeof(int));
-    int *height = malloc(n * sizeof(int));
-    if (!pos || !rank_arr || !height) { fprintf(stderr, "Malloc failed\n"); exit(1); }
+    if (!pos || !rank_arr ) { fprintf(stderr, "Malloc failed\n"); exit(1); }
 
     clock_t start_seq = clock();
     suffix_sort(str, n, pos, rank_arr);
     clock_t end_seq = clock();
-    build_lcp(str, n, pos, rank_arr, height);
 
     double sequential_time = ((double)(end_seq - start_seq)) / CLOCKS_PER_SEC;
 
@@ -73,7 +70,6 @@ int main(int argc, char *argv[]) {
     free(str);
     free(pos);
     free(rank_arr);
-    free(height);
     free(input);
 
     return 0;
