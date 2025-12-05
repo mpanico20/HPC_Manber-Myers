@@ -1,0 +1,6 @@
+Version;Num of thread;Elapsed Time (s);Speedup;Efficency
+Serial;1;0.005761;1.000000;100.000000%
+OpenMP_v1;1;0.079127;0.072807;7.280683%
+OpenMP_v1;2;0.196755;0.029280;1.464002%
+OpenMP_v1;4;0.302953;0.019016;0.475404%
+OpenMP_v1;8;0.609887;0.009446;0.118075%
