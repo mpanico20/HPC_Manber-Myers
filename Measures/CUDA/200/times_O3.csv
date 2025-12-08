@@ -1,2 +1,3 @@
 Version;Elapsed Time (s);Speedup
 Serial;9.999354;1.000000
+CUDA;1.430444;6.990384
