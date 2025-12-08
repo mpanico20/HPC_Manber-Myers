@@ -52,7 +52,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     free(freq);
 
     //
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < n; i++) {
         bh[i] = (i == 0) || (str[pos[i]] != str[pos[i - 1]]);
         b2h[i] = 0;
@@ -75,7 +75,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
         //
         for (int i = 0; i < n; i = next_bucket[i]) {
             cnt[i] = 0;
-            #pragma omp parallel for
+            #pragma omp parallel for schedule(static)
             for (int j = i; j < next_bucket[i]; j++)
                 rank_arr[pos[j]] = i;
         }
@@ -85,7 +85,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
 
         //
         for (int i = 0; i < n; i = next_bucket[i]) {
-            #pragma omp parallel for
+            #pragma omp parallel for schedule(static)
             for (int j = i; j < next_bucket[i]; j++) {
                 int s = pos[j] - h;
                 if (s >= 0) {
@@ -99,7 +99,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
             }
 
             //
-            #pragma omp parallel for
+            #pragma omp parallel for schedule(static)
             for (int j = i; j < next_bucket[i]; j++) {
                 int s = pos[j] - h;
                 if (s >= 0 && b2h[rank_arr[s]]) {
@@ -110,7 +110,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
         }
 
         //
-        #pragma omp parallel for
+        #pragma omp parallel for schedule(static)
         for (int i = 0; i < n; i++) {
             pos[rank_arr[i]] = i;
             bh[i] |= b2h[i];
@@ -118,7 +118,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     }
 
     //Final ranking
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < n; i++)
         rank_arr[pos[i]] = i;
 
