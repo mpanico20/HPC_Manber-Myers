@@ -4,14 +4,15 @@ import os
 import sys
 
 # ---------------------- Controllo argomenti da riga di comando ----------------------
-if len(sys.argv) < 4:
-    print("Uso: python3 file.py <percorso_file_csv> <nome_serial> <nome_parallel>")
+if len(sys.argv) < 5:
+    print("Uso: python3 file.py <percorso_file_csv> <nome_serial> <nome_parallel> <string>")
     print("Esempio: python3 file.py dataset.csv O0 OpenMP_v1")
     sys.exit(1)
 
 csv_file = sys.argv[1]
 serial_name = sys.argv[2]      # Es. O0
 parallel_name = sys.argv[3]    # Es. OpenMP_v1
+string_name = sys.argv[4]
 
 if not os.path.exists(csv_file):
     raise FileNotFoundError(f"Il file '{csv_file}' non esiste")
@@ -49,10 +50,7 @@ def plot_speedup(df, serial_name, parallel_name):
     plt.legend()
     plt.tight_layout()
 
-    output_file = f'Graphs/speedup_vs_serial_{serial_name}_{parallel_name}.png'
+    output_file = f'Graphs/speedup_vs_serial_{serial_name}_{parallel_name}_{string_name}.png'
     plt.savefig(output_file)
-    plt.show()
-    print(f"Grafico salvato come '{output_file}'")
 
-# ---------------------- Genera grafico ----------------------
 plot_speedup(df, serial_name, parallel_name)
