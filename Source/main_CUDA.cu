@@ -24,28 +24,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "../Header/suffix_arrays.h"
 
+void build_lcp(const int *str, int n, const int *pos, int *rank_arr, int *height) {
+    for (int i = 0; i < n; i++)
+        rank_arr[pos[i]] = i;
+
+    int h = 0;
+    height[0] = 0;
+    for (int i = 0; i < n; i++) {
+        if (rank_arr[i] > 0) {
+            int j = pos[rank_arr[i] - 1];
+            while (i + h < n && j + h < n && str[i + h] == str[j + h]) h++;
+            height[rank_arr[i]] = h;
+            if (h > 0) h--;
+        }
+    }
+}
+
+
+
+
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <nomefile> <optimization_level> <version to compare>\n", argv[0]);
+
+    if (argc < 2) {
+        printf("Uso: %s <nomefile>\n", argv[0]);
         return 1;
     }
 
     int n;
     char *input = load_string_from_file(argv[1], &n);
 
-
-    // Copia in array di int
     int *str = (int *)malloc(n * sizeof(int));
-    if (!str) { fprintf(stderr, "Malloc failed\n"); exit(1); }
-
+    int *height = (int *)malloc(n * sizeof(int));
     for (int i = 0; i < n; i++)
         str[i] = (unsigned char)input[i];
 
     int *pos = (int *)malloc(n * sizeof(int));
     int *rank_arr = (int *)malloc(n * sizeof(int));
-    if (!pos || !rank_arr ) { fprintf(stderr, "Malloc failed\n"); exit(1); }
 
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
@@ -56,23 +73,42 @@ int main(int argc, char *argv[]) {
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
-    float elapsed_time_float = 0.0f;
-    cudaEventElapsedTime(&elapsed_time_float, start, stop);
-    double elapsed_time = (double)elapsed_time_float / 1000.0; // Convert to second
+    float ms = 0;
+    cudaEventElapsedTime(&ms, start, stop);
+    build_lcp(str, n, pos, rank_arr, height);
 
     printf("Suffix Array (pos):\n");
-    for (int i = 0; i < 5; i++){
-        printf("rank %d: %d\n",i , rank_arr[i]);
+    for (int i = 0; i < 5; i++)
         printf("%2d:\n", pos[i]);
-    }
-    
 
-    printf("Time elapsed: %f\n", elapsed_time);
+    printf("\nLCP array:\n");
+    for (int i = 0; i < 5; i++)
+        printf("%d ", height[i]);
+    printf("\n");
+
+    int max_len = 0;
+    int start_index = 0;
+
+    for (int i = 1; i < n; i++) {
+        if (height[i] > max_len) {
+            max_len = height[i];
+            start_index = pos[i-1];  // puoi anche scegliere pos[i-1], sono equivalenti
+        }
+    }
+
+    printf("Max substring length: %d\n", max_len);
+    printf("Substring: ");
+    printf("Pos: %d\n", start_index);
+    for (int j = 0; j < max_len; j++)
+        putchar(str[start_index + j]);
+    printf("\n");
+    for(int i = 0; i<5; i++)
+    printf("rank %d: %d\n",i , rank_arr[i]);
+    printf("Time elapsed: %f seconds\n", ms / 1000.0f);
 
     free(str);
     free(pos);
     free(rank_arr);
     free(input);
-
     return 0;
 }
