@@ -52,7 +52,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     free(freq);
 
     //
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < n; i++) {
         bh[i] = (i == 0) || (str[pos[i]] != str[pos[i - 1]]);
         b2h[i] = 0;
@@ -104,7 +104,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
         }
 
         // aggiornamento finale: parallelizzabile
-        #pragma omp parallel for
+        #pragma omp parallel for schedule(static)
         for (int i = 0; i < n; i++) {
             pos[rank_arr[i]] = i;
             bh[i] |= b2h[i];
@@ -112,7 +112,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     }
 
     // Rank finale: parallelizzabile
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < n; i++)
         rank_arr[pos[i]] = i;
 
