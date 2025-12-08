@@ -4,8 +4,8 @@ import os
 import sys
 
 if len(sys.argv) < 5:
-    print("Uso: python3 file.py <percorso_file_csv> <nome_serial> <nome_parallel> <string>")
-    print("Esempio: python3 file.py dataset.csv O0 OpenMP_v1")
+    print("Use: python3 graph.py <path_csv_file> <optimization_level> <parallel_version> <string>")
+    print("Example: python3 graph.py dataset.csv O0 OpenMP_v1 1MB")
     sys.exit(1)
 
 csv_file = sys.argv[1]
