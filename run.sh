@@ -5,7 +5,7 @@ folders=(1 50 100 200 500)
 versions=(O0 O1 O2 O3)
 sizes=(1 50 100 200 500)
 parallel_name="OpenMP_v2"
-script="grapg.py"
+script="graph.py"
 
 # ---------------------- Loop su tutte le combinazioni ----------------------
 for folder in "${folders[@]}"; do
