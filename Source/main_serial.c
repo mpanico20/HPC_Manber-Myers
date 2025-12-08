@@ -28,7 +28,8 @@
 #include <ctype.h>
 #include "../Header/suffix_arrays.h"
 
-void write_csv(const char *filename, double sequential_time, double speedup, double efficiency);
+void write_csv_omp(const char *filename, double sequential_time, double speedup, double efficiency);
+void write_csv_cuda(const char *filename, double sequential_time, double speedup);
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -62,10 +63,10 @@ int main(int argc, char *argv[]) {
     int mb = extractMB(argv[1]);
 
     sprintf(filename, "../Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
-    write_csv(filename, sequential_time, speedup, efficiency);
+    write_csv_omp(filename, sequential_time, speedup, efficiency);
 
     sprintf(filename, "../Measures/CUDA/%d/times_%s.csv", mb, argv[2]);
-    write_csv(filename, sequential_time, speedup, efficiency);
+    write_csv_cuda(filename, sequential_time, speedup, efficiency);
 
     free(str);
     free(pos);
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void write_csv(const char *filename, double sequential_time, double speedup, double efficiency) {
+void write_csv_omp(const char *filename, double sequential_time, double speedup, double efficiency) {
     FILE *csv = fopen(filename, "a");
     if (!csv) {
         printf("Error opening file %s!\n", filename);
@@ -89,5 +90,22 @@ void write_csv(const char *filename, double sequential_time, double speedup, dou
 
     // Scrive i dati
     fprintf(csv, "Serial;1;%f;%f;%f%%\n", sequential_time, speedup, efficiency);
+    fclose(csv);
+}
+
+void write_csv_cuda(const char *filename, double sequential_time, double speedup) {
+    FILE *csv = fopen(filename, "a");
+    if (!csv) {
+        printf("Error opening file %s!\n", filename);
+        exit(1);
+    }
+
+    // Scrive intestazione se il file è vuoto
+    if (ftell(csv) == 0) {
+        fprintf(csv, "Version;Elapsed Time (s);Speedup\n");
+    }
+
+    // Scrive i dati
+    fprintf(csv, "Serial;%f;%f\n", sequential_time, speedup);
     fclose(csv);
 }

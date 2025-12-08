@@ -1,2 +1,2 @@
-Version;Num of thread;Elapsed Time (s);Speedup;Efficency
-Serial;1;0.008022;1.000000;100.000000%
+Version;Elapsed Time (s);Speedup
+Serial;0.008022;1.000000

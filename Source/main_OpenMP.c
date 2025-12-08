@@ -28,7 +28,7 @@
 #include "../Header/suffix_arrays.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
+    if (argc < 5) {
         printf("Uso: %s <nomefile> <optimization level> <number of thread> <parallel version>\n", argv[0]);
         return 1;
     }
