@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# Array delle cartelle / dimensioni
 folders=(1 50 100 200 500)
 
-# Array delle ottimizzazioni
 opts=(O0 O1 O2 O3)
 
-# Ciclo principale
 for folder in "${folders[@]}"; do
     for opt in "${opts[@]}"; do
         file_path="Measures/OpenMP/${folder}/times_${opt}.csv"
