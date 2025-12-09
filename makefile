@@ -11,7 +11,7 @@ GRAPH_DIR=Graphs
 
 all: clean generate exe_serial exe_omp_v1 exe_omp_v2 exe_cuda run run_omp_v1 run_omp_v2 run_cuda run_graphs_omp run_graphs_cuda
 
-generate: generator
+generate: clean_string generator run_generator
 
 exe_serial: sequential_O0 sequential_O1 sequential_O2 sequential_O3
 
@@ -80,6 +80,9 @@ run_omp_v1: run_omp_v1_O0 run_omp_v1_O1 run_omp_v1_O2 run_omp_v1_O3
 run_omp_v2: run_omp_v2_O0 run_omp_v2_O1 run_omp_v2_O2 run_omp_v2_O3
 
 run_cuda: run_cuda_O0 run_cuda_O1 run_cuda_O2 run_cuda_O3
+
+run_generator: generator
+	$(BUILD_DIR)/generator
 
 run_serialO0: sequential_O0
 	$(BUILD_DIR)/sequential_O0 $(DATA_DIR)/string_1MB.txt O0
@@ -318,6 +321,9 @@ run_graphs_omp:
 
 run_graphs_cuda:
 	bash cuda.sh
+
+clean_string:
+	rm -f $(DATA_DIR)/*
 
 clean:
 	rm -f $(BUILD_DIR)/* $(GRAPH_DIR)/* $(MEASURES_CUDA_DIR)/1/* $(MEASURES_CUDA_DIR)/50/* $(MEASURES_CUDA_DIR)/100/* $(MEASURES_CUDA_DIR)/200/* $(MEASURES_CUDA_DIR)/500/* $(MEASURES_OpenMP_DIR)/1/* $(MEASURES_OpenMP_DIR)/50/* $(MEASURES_OpenMP_DIR)/100/* $(MEASURES_OpenMP_DIR)/200/* $(MEASURES_OpenMP_DIR)/500/* $(DATA_DIR)/*

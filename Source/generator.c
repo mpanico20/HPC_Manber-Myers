@@ -38,7 +38,7 @@ int main() {
         size_t n_chars = total_sizes[s] / n_arrays;
 
         char filename[64];
-        sprintf(filename, "../Data/string_%zuMB.txt", total_sizes[s]/1024/1024);
+        sprintf(filename, "Data/string_%zuMB.txt", total_sizes[s]/1024/1024);
 
         FILE *f = fopen(filename, "w");
         if (!f) { perror("fopen"); return 1; }
