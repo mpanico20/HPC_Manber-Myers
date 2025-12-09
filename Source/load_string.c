@@ -8,7 +8,7 @@
 *
 * This file is part of Mamber-Myers.
 *
-* Copyright (C) 2024 - All Rights Reserved
+* Copyright (C) 2025 - All Rights Reserved
 *
 * This program is free software: you can redistribute it and/or modify it under the terms of
 * the GNU General Public License as published by the Free Software Foundation, either version
@@ -32,7 +32,6 @@ char *load_string_from_file(const char *filename, int *n) {
         exit(1);
     }
 
-    //Go to the end to find out the size
     if (fseek(f, 0, SEEK_END) != 0) {
         perror("Errore fseek");
         fclose(f);
@@ -47,7 +46,6 @@ char *load_string_from_file(const char *filename, int *n) {
     }
     rewind(f);
 
-    //Allocate memory (add 2 bytes for '$' and '\0')
     char *input = malloc(file_size + 2);
     if (!input) {
         fprintf(stderr, "Memory allocation error (%.2f MB required)\n", file_size / (1024.0 * 1024.0));
@@ -55,15 +53,12 @@ char *load_string_from_file(const char *filename, int *n) {
         exit(1);
     }
 
-    //Read the file
     size_t read_bytes = fread(input, 1, file_size, f);
     fclose(f);
 
-    //Removes any trailing newlines
     while (read_bytes > 0 && (input[read_bytes - 1] == '\n' || input[read_bytes - 1] == '\r'))
         read_bytes--;
 
-    //Adds array suffix terminator
     input[read_bytes++] = '$';
     input[read_bytes] = '\0';
 

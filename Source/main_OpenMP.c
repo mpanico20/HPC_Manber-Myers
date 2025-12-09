@@ -8,7 +8,7 @@
 *
 * This file is part of Mamber-Myers.
 *
-* Copyright (C) 2024 - All Rights Reserved
+* Copyright (C) 2025 - All Rights Reserved
 *
 * This program is free software: you can redistribute it and/or modify it under the terms of
 * the GNU General Public License as published by the Free Software Foundation, either version
@@ -42,7 +42,6 @@ int main(int argc, char *argv[]) {
     int n;
     char *input = load_string_from_file(argv[1], &n);
 
-    // Copia in array di int
     int *str = malloc(n * sizeof(int));
     if (!str) { fprintf(stderr, "Malloc failed\n"); exit(1); }
 

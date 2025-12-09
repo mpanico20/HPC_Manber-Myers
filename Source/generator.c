@@ -8,7 +8,7 @@
 *
 * This file is part of Mamber-Myers.
 *
-* Copyright (C) 2024 - All Rights Reserved
+* Copyright (C) 2025 - All Rights Reserved
 *
 * This program is free software: you can redistribute it and/or modify it under the terms of
 * the GNU General Public License as published by the Free Software Foundation, either version
@@ -26,7 +26,6 @@
 #include <time.h>
 
 int main() {
-    //Desired total size
     size_t total_sizes[] = {1024*1024, 50*1024*1024, 100*1024*1024, 200*1024*1024, 500*1024*1024};
     size_t n_sizes = sizeof(total_sizes)/sizeof(total_sizes[0]);
     size_t n_arrays = 8;

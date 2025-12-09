@@ -8,7 +8,7 @@
 *
 * This file is part of Mamber-Myers.
 *
-* Copyright (C) 2024 - All Rights Reserved
+* Copyright (C) 2025 - All Rights Reserved
 *
 * This program is free software: you can redistribute it and/or modify it under the terms of
 * the GNU General Public License as published by the Free Software Foundation, either version
@@ -29,24 +29,20 @@
 #include "../Header/suffix_arrays.h"
 
 int extractMB(char *filepath) {
-    //Extract only the file name without the path
     char *last_slash = strrchr(filepath, '/');
     char *filename = (last_slash) ? last_slash + 1 : filepath;
 
-    //Remove extension, if any
     char *dot = strrchr(filename, '.');
     if (dot) *dot = '\0';
 
-    //Find the last underscore
     char *underscore = strrchr(filename, '_');
     if (!underscore) {
         fprintf(stderr, "Invalid file format (no '_')\n");
         return -1;
     }
 
-    underscore++; //point to the number before "MB"
+    underscore++;
 
-    //Copy only the numeric part up to "MB"
     char num_str[20] = {0};
     int i = 0;
     while (isdigit(underscore[i])) {

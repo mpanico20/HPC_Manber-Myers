@@ -8,7 +8,7 @@
 *
 * This file is part of Mamber-Myers.
 *
-* Copyright (C) 2024 - All Rights Reserved
+* Copyright (C) 2025 - All Rights Reserved
 *
 * This program is free software: you can redistribute it and/or modify it under the terms of
 * the GNU General Public License as published by the Free Software Foundation, either version
@@ -40,13 +40,11 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
     for (int i = 0; i < n; i++) pos[--freq[str[i]]] = i;
     free(freq);
 
-    // ---------- INIZIALIZZA BUCKET ----------
     for (int i = 0; i < n; i++) {
         bh[i] = (i == 0) || (str[pos[i]] != str[pos[i - 1]]);
         b2h[i] = 0;
     }
 
-    // ---------- MANBER & MYERS ----------
     for (int h = 1; h < n; h <<= 1) {
         int buckets = 0;
 
@@ -57,7 +55,7 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
             buckets++;
         }
 
-        if (buckets == n) break; // tutti distinti
+        if (buckets == n) break;
 
         for (int i = 0; i < n; i = next_bucket[i]) {
             cnt[i] = 0;
@@ -93,7 +91,6 @@ void suffix_sort(const int *str, int n, int *pos, int *rank_arr) {
         }
     }
 
-    // Rank finale
     for (int i = 0; i < n; i++)
         rank_arr[pos[i]] = i;
 
