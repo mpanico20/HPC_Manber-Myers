@@ -62,10 +62,10 @@ int main(int argc, char *argv[]) {
     char filename[250];
     int mb = extractMB(argv[1]);
 
-    sprintf(filename, "../Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
+    sprintf(filename, "Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
     write_csv_omp(filename, sequential_time, speedup, efficiency);
 
-    sprintf(filename, "../Measures/CUDA/%d/times_%s.csv", mb, argv[2]);
+    sprintf(filename, "Measures/CUDA/%d/times_%s.csv", mb, argv[2]);
     write_csv_cuda(filename, sequential_time, speedup, efficiency);
 
     free(str);

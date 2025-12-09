@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     double parallel_time = end_par - start_par;
     int mb = extractMB(argv[1]);
     char filename[250];
-    sprintf(filename, "../Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
+    sprintf(filename, "Measures/OpenMP/%d/times_%s.csv", mb, argv[2]);
     FILE *csv_serial = fopen(filename, "r");
     double sequential_time;
     char line[256];
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     double efficiency = calculateEfficiency(speedup, num_thread);
 
     char filenameCsv[250];
-    sprintf(filenameCsv, "../Measures/OpenMP/%d/times_%s.csv",mb,argv[2]);
+    sprintf(filenameCsv, "Measures/OpenMP/%d/times_%s.csv",mb,argv[2]);
 
     FILE *csv;
     csv = fopen(filenameCsv, "a");
