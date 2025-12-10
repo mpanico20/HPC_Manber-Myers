@@ -9,7 +9,7 @@ MEASURES_CUDA_DIR=Measures/CUDA
 DATA_DIR=Data
 GRAPH_DIR=Graphs
 
-all: clean generate exe_serial exe_omp_v1 exe_omp_v2 exe_cuda run run_omp_v1 run_omp_v2 run_cuda run_graphs_omp run_graphs_cuda
+all: clean generate exe_serial exe_omp_v1 exe_omp_v2 exe_cuda run run_omp_v1 run_omp_v2 run_cuda run_graphs_omp_v1 run_graphs_omp_v2 run_graphs_cuda
 
 generate: clean_string generator run_generator
 
@@ -316,8 +316,11 @@ run_cuda_O3: CUDA_O3
 	$(BUILD_DIR)/CUDA_O3 $(DATA_DIR)/string_200MB.txt O3
 	$(BUILD_DIR)/CUDA_O3 $(DATA_DIR)/string_500MB.txt O3
 
-run_graphs_omp:
-	bash run.sh
+run_graphs_omp_v1:
+	bash run_omp_v1.sh
+
+run_graphs_omp_v2:
+	bash run_omp_v2.sh
 
 run_graphs_cuda:
 	bash cuda.sh
